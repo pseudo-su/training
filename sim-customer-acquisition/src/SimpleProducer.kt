@@ -23,7 +23,7 @@ class SimpleProducer(brokers: String, schemaRegistryUrl: String) {
 
     private val logger = LogManager.getLogger(javaClass)
     private val producer = createProducer(brokers, schemaRegistryUrl)
-    private val schema = Schema.Parser().parse(File("src/main/resources/person.avsc"))
+    private val schema = Schema.Parser().parse(File("resources/person.avsc"))
 
     private fun createProducer(brokers: String, schemaRegistryUrl: String): Producer<String, GenericRecord> {
         val props = Properties()

@@ -19,33 +19,26 @@ apply plugin: 'application'
 
 mainClassName = 'com.sim.customer.acquisition.SimpleProducerKt'
 
-// TODO: move the src/main/resources and src/main/kotlin folders
-// sourceSets {
-//     main.kotlin {
-//         srcDirs = [ 'src' ]
-//         includes = [ '*' ]
-//         excludes = [ '*Test.kt' ]
-//     }
-//     main.resources {
-//         srcDirs = [ 'resources' ]
-//         includes = [ '*' ]
-//     }
-// }
+sourceSets {
+    main.kotlin {
+        srcDirs = [ 'src' ]
+        includes = [ '*' ]
+        excludes = [ '*Test.kt' ]
+    }
+    main.resources {
+        srcDirs = [ 'resources' ]
+        includes = [ '*' ]
+    }
+    sourceSets.test.kotlin.srcDirs = ["src"]
+}
+
+sourceCompatibility = 1.8
 
 repositories {
     jcenter()
     mavenCentral()
     maven { url 'https://packages.confluent.io/maven/' }
 }
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "io.ktor:ktor-server-netty:$ktor_version"
-    compile "io.ktor:ktor-html-builder:$ktor_version"
-    compile "ch.qos.logback:logback-classic:$logback_version"
-}
-
-sourceCompatibility = 1.8
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -64,6 +57,11 @@ dependencies {
     // Kafka
     compile 'org.apache.kafka:kafka-clients:2.0.0'
     compile 'io.confluent:kafka-avro-serializer:5.0.0'
+    
+    // Tests
+    testCompile  'junit:junit:4.11'
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
 // kotlin.experimental.coroutines = 'enable'
