@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = "1.3.50"
+    ext.jackson_version = "2.9.6"
     ext.ktor_version = "1.2.4"
     ext.logback_version = "1.2.3"
     ext.slf4j_version = "1.7.25"
@@ -18,11 +19,6 @@ apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "application"
 apply plugin: "idea"
 
-idea.module {
-    scopes.TEST.plus += [ configurations.testCompile ]
-}
-
-
 mainClassName = "com.sim.customer.acquisition.SimpleProducerKt"
 
 sourceSets {
@@ -37,7 +33,8 @@ sourceSets {
     }
     test {
         kotlin {
-            srcDirs = ["src"]
+            // TODO: Intellij chucks a hissy fit if we put .test.kt files in `src` 🙄
+            srcDirs = ["src", "test"]
             include "**/*.test.kt"
         }
     }
@@ -63,20 +60,17 @@ dependencies {
     compile "org.slf4j:slf4j-log4j12:1.7.25"
 
     // JSON serialization
-    compile "com.fasterxml.jackson.core:jackson-databind:2.9.6"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
 
     // Kafka
     compile "org.apache.kafka:kafka-clients:2.0.0"
     compile "io.confluent:kafka-avro-serializer:5.0.0"
-    
-    // TODO: make this testCompile instead of compile without breaking IDE
-    compile "junit:junit:4.11"
-    compile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-}
 
-// kotlin.experimental.coroutines = "enable"
+    testCompile "junit:junit:4.11"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+}
 
 shadowJar {
     archiveBaseName = "sim-customer-acquisition"
