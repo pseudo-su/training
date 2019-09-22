@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "Person",
-  "namespace": "com.ippontech.kafkatutorials",
+  "namespace": "com.sim.customer.acquisition",
   "fields": [
     {
       "name": "firstName",

@@ -21,24 +21,24 @@ apply plugin: "idea"
 
 mainClassName = "com.sim.customer.acquisition.SimpleProducerKt"
 
-sourceSets {
-    main {
-        kotlin {
-            srcDirs = ["src"]
-            exclude "**/*.test.kt"
-        }
-        resources {
-            srcDirs = [ "resources" ]
-        }
-    }
-    test {
-        kotlin {
-            // TODO: Intellij chucks a hissy fit if we put .test.kt files in `src` 🙄
-            srcDirs = ["src", "test"]
-            include "**/*.test.kt"
-        }
-    }
-}
+// TODO: Intellij chucks a hissy fit if we put use sourceSets like this 🙄
+// sourceSets {
+//     main {
+//         kotlin {
+//             srcDirs = ["src"]
+//             exclude "**/*.test.kt"
+//         }
+//         resources {
+//             srcDirs = [ "resources" ]
+//         }
+//     }
+//     test {
+//         kotlin {
+//             srcDirs = ["test"]
+//             include "**/*.test.kt"
+//         }
+//     }
+// }
 
 sourceCompatibility = 1.8
 

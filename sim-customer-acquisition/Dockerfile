@@ -16,8 +16,8 @@ WORKDIR /app
 
 USER $APPLICATION_USER
 
-COPY --from=builder /root/build/libs/$APPLICATION_NAME.jar ./app.jar
-
+COPY --from=builder /root/build/libs/$APPLICATION_NAME.jar ./application.jar
+COPY avro/ avro/
 
 CMD [ \
   "java", \
@@ -31,5 +31,5 @@ CMD [ \
   "-XX:MaxGCPauseMillis=100", \
   "-XX:+UseStringDeduplication", \
   "-jar", \
-  "app.jar" \
+  "application.jar" \
 ]

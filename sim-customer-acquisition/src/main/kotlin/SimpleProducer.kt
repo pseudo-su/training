@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.log4j.LogManager
 import java.io.File
+import java.io.InputStreamReader
 import java.util.*
 
 // $ kafka-topics --zookeeper localhost:2181 --create --topic persons-avro --replication-factor 1 --partitions 4
@@ -23,7 +24,9 @@ class SimpleProducer(brokers: String, schemaRegistryUrl: String) {
 
     private val logger = LogManager.getLogger(javaClass)
     private val producer = createProducer(brokers, schemaRegistryUrl)
-    private val schema = Schema.Parser().parse(File("resources/person.avsc"))
+    private val fileName = "/person.avsc"
+    private val schemaFile = javaClass.getResourceAsStream(fileName)
+    private val schema = Schema.Parser().parse(schemaFile)
 
     private fun createProducer(brokers: String, schemaRegistryUrl: String): Producer<String, GenericRecord> {
         val props = Properties()
