@@ -1,7 +1,10 @@
-version: '2.1'
+version: '2.2'
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_CLIENT_PORT: 2181
     healthcheck:
       test: echo stat | nc localhost 2181
       interval: 10s
@@ -9,35 +12,81 @@ services:
       retries: 3
     ports:
       - "2181:2181"
-  kafka:
-    image: wurstmeister/kafka
-    healthcheck:
-      test: "kafka-topics.sh --zookeeper zookeeper:2181 --list 2>&1 | grep \"topology\""
-      interval: 3s
-      timeout: 10s
-      retries: 5
+
+  kafka-1:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: HOST://127.0.0.1:9092,DOCKER://kafka-1:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: HOST:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+    # healthcheck:
+    #   test: "/bin/bash kafka-topics --zookeeper zookeeper:2181 --list 2>&1 | grep \"_schemas\""
+    #   interval: 3s
+    #   timeout: 10s
+    #   retries: 5
     depends_on:
-      zookeeper:
+      zookeeper-1:
         condition: service_healthy
     ports:
       - "9092:9092"
+
+  # default-config:
+  #   image: confluentinc/cp-schema-registry:latest
+  #   environment:
+  #     SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181/defaultconfig
+  #     SCHEMA_REGISTRY_HOST_NAME: default-config
+
+  schema-registry-1:
+    image: confluentinc/cp-schema-registry:latest
     environment:
-      KAFKA_LISTENERS: INSIDE_DOCKER://:9092
-      KAFKA_ADVERTISED_LISTENERS: INSIDE_DOCKER://kafka:9092
-      #KAFKA_ADVERTISED_LISTENERS: OUTSIDE_DOCKER://${DOCKER_HOST_IP:-127.0.0.1}:19092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE_DOCKER:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE_DOCKER
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "customers:1:1,transactions:1:1"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  sim-customer-acquisition:
-    build: sim-customer-acquisition
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: DOCKER://kafka-1:19092
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+
+  # default-config:
+  #   image: confluentinc/cp-kafka-rest:latest
+  #   restart: on-failure:3
+  #   environment:
+  #     KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper:2181/defaultconfig
+  #     KAFKA_REST_HOST_NAME: default-config
+
+  kafka-rest-1:
+    image: confluentinc/cp-kafka-rest:latest
+    restart: on-failure:3
     environment:
-      APP_KAFKA_BROKERS: kafka:9092
-      APP_SERVER_PORT: 8080
-    depends_on:
-      kafka:
-        condition: service_started
-    ports: 
-      - "8080:8080"
+      KAFKA_REST_BOOTSTRAP_SERVERS: DOCKER://kafka-1:19092
+      KAFKA_REST_HOST_NAME: kafka-rest
+
+  # control-center:
+  #   image: confluentinc/cp-enterprise-control-center:latest
+  #   environment:
+  #     CONTROL_CENTER_ZOOKEEPER_CONNECT: "zookeeper:2181/defaultconfig"
+  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka:9092"
+  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
+
+  control-center-1:
+    image: confluentinc/cp-enterprise-control-center:latest
+    command: "bash -c '/etc/confluent/docker/configure && touch /tmp/config-is-done && sleep infinity'"
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: DOCKER://kafka-1:19092
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      # CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 3
+      CONTROL_CENTER_COMMAND_TOPIC_RETENTION_MS: 1000
+      CONTROL_CENTER_REST_LISTENERS: "http://0.0.0.0:9021,https://0.0.0.0:443"
+      # CONTROL_CENTER_REST_SSL_KEYSTORE_LOCATION: "/path/to/keystore"
+      CONTROL_CENTER_CONNECT_TIMEOUT: 30000
+      # CONTROL_CENTER_MAIL_ENABLED: "true"
+      # CONTROL_CENTER_MAIL_HOST_NAME: "foo.com"
+      # CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SOME_PROTOCOL
+      # CONTROL_CENTER_STREAMS_SASL_KERBEROS_SERVICE_NAME: kafka
+      # CONTROL_CENTER_STREAMS_SSL_KEYSTORE_LOCATION: /path/to/keystore
+      # CONTROL_CENTER_STREAMS_SSL_KEYSTORE_PASSWORD: password
+      # CONTROL_CENTER_STREAMS_SSL_KEY_PASSWORD: password
+      # CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_LOCATION: /path/to/truststore
+      # CONTROL_CENTER_STREAMS_SSL_TRUSTSTORE_PASSWORD: password
+      # CONTROL_CENTER_STREAMS_PRODUCER_LINGER_MS: 1000

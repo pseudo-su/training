@@ -10,8 +10,6 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.log4j.LogManager
-import java.io.File
-import java.io.InputStreamReader
 import java.util.*
 
 // $ kafka-topics --zookeeper localhost:2181 --create --topic persons-avro --replication-factor 1 --partitions 4
