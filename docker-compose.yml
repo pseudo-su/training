@@ -33,24 +33,11 @@ services:
     ports:
       - "9092:9092"
 
-  # default-config:
-  #   image: confluentinc/cp-schema-registry:latest
-  #   environment:
-  #     SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181/defaultconfig
-  #     SCHEMA_REGISTRY_HOST_NAME: default-config
-
   schema-registry-1:
     image: confluentinc/cp-schema-registry:latest
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: DOCKER://kafka-1:19092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-
-  # default-config:
-  #   image: confluentinc/cp-kafka-rest:latest
-  #   restart: on-failure:3
-  #   environment:
-  #     KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper:2181/defaultconfig
-  #     KAFKA_REST_HOST_NAME: default-config
 
   kafka-rest-1:
     image: confluentinc/cp-kafka-rest:latest
@@ -58,13 +45,6 @@ services:
     environment:
       KAFKA_REST_BOOTSTRAP_SERVERS: DOCKER://kafka-1:19092
       KAFKA_REST_HOST_NAME: kafka-rest
-
-  # control-center:
-  #   image: confluentinc/cp-enterprise-control-center:latest
-  #   environment:
-  #     CONTROL_CENTER_ZOOKEEPER_CONNECT: "zookeeper:2181/defaultconfig"
-  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka:9092"
-  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
 
   control-center-1:
     image: confluentinc/cp-enterprise-control-center:latest
